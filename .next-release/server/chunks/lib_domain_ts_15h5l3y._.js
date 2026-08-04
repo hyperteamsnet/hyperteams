@@ -1,0 +1,1 @@
+module.exports=[529232,r=>{"use strict";function e(r){let e=process.env[r];return e&&e.trim()?e.trim():null}r.s(["caddyPort",0,function(){let r=e("CADDY_PORT"),t=r?Number(r):NaN;return Number.isInteger(t)&&t>0&&t<65536?t:27788},"dashboardPort",0,function(){let r=e("DASHBOARD_PORT"),t=r?Number(r):NaN;return Number.isInteger(t)&&t>0&&t<65536?t:27777}])}];
