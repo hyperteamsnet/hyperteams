@@ -1,0 +1,89 @@
+module.exports=[270406,(e,t,r)=>{t.exports=e.x("next/dist/compiled/@opentelemetry/api",()=>require("next/dist/compiled/@opentelemetry/api"))},193695,(e,t,r)=>{t.exports=e.x("next/dist/shared/lib/no-fallback-error.external.js",()=>require("next/dist/shared/lib/no-fallback-error.external.js"))},653828,660094,e=>{"use strict";var t=e.i(154741),r=e.i(80232),n=e.i(812759);function o(e,t){return null!=e?e.trim()||null:t?.trim()||null}function a(e){let o=r.db.select().from(n.schema.appSettings).where((0,t.eq)(n.schema.appSettings.key,e)).get();return o?.value??null}e.s(["preferStored",0,o,"resolveRunToken",0,function(e){if(null!==e.storedToken&&void 0!==e.storedToken)return e.storedToken.trim()||null;let t=e.envToken?.trim();if(!t)return null;let r=e.storedKey?.trim();return r&&r!==e.envKey?.trim()?null:t}],660094),e.s(["getSetting",0,a,"getSettingOrEnv",0,function(e,t){return o(a(e),t)},"setSetting",0,function(e,t){r.db.insert(n.schema.appSettings).values({key:e,value:t,updatedAt:Math.floor(Date.now()/1e3)}).onConflictDoUpdate({target:n.schema.appSettings.key,set:{value:t,updatedAt:Math.floor(Date.now()/1e3)}}).run()}],653828)},902157,(e,t,r)=>{t.exports=e.x("node:fs",()=>require("node:fs"))},918622,(e,t,r)=>{t.exports=e.x("next/dist/compiled/next-server/app-page-turbo.runtime.prod.js",()=>require("next/dist/compiled/next-server/app-page-turbo.runtime.prod.js"))},556704,(e,t,r)=>{t.exports=e.x("next/dist/server/app-render/work-async-storage.external.js",()=>require("next/dist/server/app-render/work-async-storage.external.js"))},832319,(e,t,r)=>{t.exports=e.x("next/dist/server/app-render/work-unit-async-storage.external.js",()=>require("next/dist/server/app-render/work-unit-async-storage.external.js"))},324725,(e,t,r)=>{t.exports=e.x("next/dist/server/app-render/after-task-async-storage.external.js",()=>require("next/dist/server/app-render/after-task-async-storage.external.js"))},750227,(e,t,r)=>{t.exports=e.x("node:path",()=>require("node:path"))},951389,(e,t,r)=>{t.exports=e.x("better-sqlite3-a9b1042fd0ef418e",()=>require("better-sqlite3-a9b1042fd0ef418e"))},874533,(e,t,r)=>{t.exports=e.x("node:child_process",()=>require("node:child_process"))},660526,(e,t,r)=>{t.exports=e.x("node:os",()=>require("node:os"))},912714,(e,t,r)=>{t.exports=e.x("node:fs/promises",()=>require("node:fs/promises"))},477892,319171,e=>{"use strict";var t=e.i(80232),r=e.i(812759),n=e.i(750227),o=e.i(902157),a=e.i(660526);function i(e){return e.toLowerCase()}function s(e){let t=n.default.resolve(e),r=t,a=[];for(;;)try{let e=o.default.realpathSync.native(r);return a.length?n.default.join(e,...a):e}catch{let e=n.default.dirname(r);if(e===r)return t;a.unshift(n.default.basename(r)),r=e}}function l(e,t){let r=i(s(e));return t.some(e=>{let t=i(s(e));return r===t||r.startsWith(t+n.default.sep)})}function u(){return[n.default.join(a.default.homedir(),".claude"),a.default.tmpdir()]}function d(){return t.db.select().from(r.schema.workspaces).all().map(e=>n.default.resolve(e.path))}function c(){return[...d(),...u()]}e.s(["canonical",0,s,"isSecretFile",0,function(e){return".credentials.json"===n.default.basename(e)},"scratchRoots",0,u,"withinRoots",0,l],319171),e.s(["isAllowedRoot",0,function(e){let t=s(e);return c().some(e=>s(e)===t)},"withinAllowed",0,function(e){return l(e,c())},"workspaceRoots",0,d],477892)},342454,e=>{"use strict";var t=e.i(874533),r=e.i(902157);e.i(912714);var n=e.i(750227),o=e.i(477892),a=e.i(319171),i=e.i(960882);function s(e,r,n=15e3){return new Promise(o=>{(0,t.execFile)("git",["-C",e,...r],{windowsHide:!0,timeout:n,maxBuffer:8388608,env:{...process.env,GIT_TERMINAL_PROMPT:"0",GIT_ASKPASS:"",SSH_ASKPASS:""}},(e,t,r)=>o({ok:!e,stdout:t??"",stderr:r??""}))})}async function l(e,t){let r=await s(e,t);return r.ok?r.stdout.trim():null}let u=new Map;async function d(e){let t=u.get(e),r=Date.now();if(t&&r-t.at<3e4)return t.root;let n=await l(e,["rev-parse","--show-toplevel"]);return u.set(e,{root:n,at:r}),n}let c=globalThis;c.__gitFetchState??={last:new Map,inFlight:new Set},c.__gitRepoLocks??=new Map;let{last:p,inFlight:h}=c.__gitFetchState,f=c.__gitRepoLocks;async function w(e,{force:t=!1}={}){if(!t&&(h.has(e)||Date.now()-(p.get(e)??0)<3e4))return{ran:!1,ok:!0};h.add(e),p.set(e,Date.now());try{let t=await s(e,["fetch","--quiet"],6e4);return t.ok?{ran:!0,ok:!0}:{ran:!0,ok:!1,error:(t.stderr||t.stdout).trim()}}finally{p.set(e,Date.now()),h.delete(e)}}async function g(e){return l(e,["rev-parse","--abbrev-ref","--symbolic-full-name","@{upstream}"])}async function m(e){for(let t of["rebase-merge","rebase-apply"]){let o=await l(e,["rev-parse","--git-path",t]);if(o&&(0,r.existsSync)(n.default.resolve(e,o)))return!0}return!1}async function x(e){let t,r=await l(e,["symbolic-ref","--short","HEAD"]);if(!r)return{status:"failed",error:(0,i.t)("err.detachedHead")};if(await g(e))t=["push"];else{let n=(await l(e,["remote"]))?.split("\n").filter(Boolean)??[];if(0===n.length)return{status:"failed",error:(0,i.t)("err.noRemote")};t=["push","--set-upstream",n.includes("origin")?"origin":n[0],r]}let n=await s(e,t,6e4),o=`${n.stdout}
+${n.stderr}`.trim();return n.ok?{status:"ok",branch:r,output:o}:{status:"failed",error:o||(0,i.t)("err.pushFailed")}}async function v(e){let t=await s(e,["diff","--name-only","--diff-filter=U"]);return t.ok?t.stdout.split("\n").map(e=>e.trim()).filter(Boolean):[]}async function R(e){if(!await g(e))return{status:"no-upstream"};let t=await l(e,["rev-parse","HEAD"]),r=await s(e,["-c","rebase.autoStash=true","pull","--rebase"],6e4);if(!r.ok){let t=`${r.stderr}
+${r.stdout}`.trim()||(0,i.t)("err.pullFailed");return await m(e)?!(await s(e,["rebase","--abort"])).ok||await m(e)?{status:"failed",error:`${t}
+
+${(0,i.t)("err.rebaseAbortFailed")}`}:{status:"rolled-back",error:t}:{status:"failed",error:t}}let n=await v(e);if(n.length>0){await s(e,["checkout","--force","HEAD","--",...n]);let t=await l(e,["stash","list"]);return{status:"stash-conflict",error:(0,i.t)("err.conflictedFiles",{files:n.join(", ")})+(t?`
+
+${(0,i.t)("err.remainingStash")}
+${t}`:"")}}return{status:"ok",updated:t!==await l(e,["rev-parse","HEAD"]),output:`${r.stdout}
+${r.stderr}`.trim()}}e.s(["fetchRemote",0,w,"forgetRepoRoot",0,function(e){void 0===e?u.clear():u.delete(e)},"git",0,s,"gitOut",0,l,"pullRebase",0,R,"pushBranch",0,x,"repoRoot",0,d,"upstreamOf",0,g,"withRepoLock",0,function(e,t){let r=n.default.resolve(e),o=(f.get(r)??Promise.resolve()).then(t,t),a=o.then(()=>{},()=>{});return f.set(r,a),a.then(()=>{f.get(r)===a&&f.delete(r)}),o},"withinWorkspaces",0,function(e){return(0,a.withinRoots)(e,(0,o.workspaceRoots)())}])},977077,e=>{"use strict";var t=e.i(713772),r=e.i(423693),n=e.i(792294),o=e.i(914761),a=e.i(918167),i=e.i(368750),s=e.i(919487),l=e.i(498466),u=e.i(883242),d=e.i(829785),c=e.i(965562),p=e.i(427424),h=e.i(923461),f=e.i(235205),w=e.i(459906),g=e.i(193695);e.i(152731);var m=e.i(736998),x=e.i(874533),v=e.i(912714),R=e.i(660526),b=e.i(750227),y=e.i(538834),$=e.i(342454),S=e.i(960882);async function T(e){let{path:t}=await e.json().catch(()=>({}));if(!t)return y.NextResponse.json({error:(0,S.t)("err.pathRequired")},{status:400});if(!(0,$.withinWorkspaces)(t))return y.NextResponse.json({error:(0,S.t)("err.outsideWorkspaceOpen")},{status:403});let r=b.default.resolve(t);try{if(!(await (0,v.stat)(r)).isDirectory())return y.NextResponse.json({error:(0,S.t)("err.notADirectoryPlain")},{status:400})}catch{return y.NextResponse.json({error:(0,S.t)("err.folderNotFound")},{status:404})}try{let e=await function(e){if("win32"===R.default.platform()){let t,r,n;return t=e.replace(/'/g,"''"),r=`
+$ErrorActionPreference = 'Stop'
+$target = '${t}'
+
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public static class Win {
+  [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+  [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr pid);
+  [DllImport("user32.dll")] public static extern bool AttachThreadInput(uint a, uint b, bool attach);
+  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+  [DllImport("user32.dll")] public static extern bool BringWindowToTop(IntPtr hWnd);
+  [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int cmd);
+  [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr hWnd);
+  [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr hWnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
+  [DllImport("kernel32.dll")] public static extern uint GetCurrentThreadId();
+}
+"@
+
+function Norm([string]$p) { return $p.TrimEnd('\\').ToLowerInvariant() }
+
+# The open Explorer window showing this exact folder, or $null.
+function Find-Window([string]$p) {
+  $shell = New-Object -ComObject Shell.Application
+  foreach ($w in $shell.Windows()) {
+    try {
+      $url = $w.LocationURL
+      if (-not $url) { continue }
+      # LocalPath turns file:///C:/x and file://wsl.localhost/y back into real
+      # Windows paths (the second being a UNC path, which WSL folders use).
+      if ((Norm ([Uri]$url).LocalPath) -eq (Norm $p)) { return $w }
+    } catch { }
+  }
+  return $null
+}
+
+$wnd = Find-Window $target
+if (-not $wnd) {
+  Start-Process explorer.exe -ArgumentList ('"' + $target + '"')
+  # Explorer takes a moment to register the new window with the shell.
+  for ($i = 0; $i -lt 60; $i++) {
+    Start-Sleep -Milliseconds 100
+    $wnd = Find-Window $target
+    if ($wnd) { break }
+  }
+}
+if (-not $wnd) { throw '${(0,S.t)("err.explorerWindowNotFound").replace(/'/g,"''")}' }
+
+$hwnd = [IntPtr]$wnd.HWND
+if ([Win]::IsIconic($hwnd)) { [Win]::ShowWindow($hwnd, 9) | Out-Null }  # SW_RESTORE
+
+# Windows only lets the process that owns the foreground window hand focus
+# away. This server isn't it, so SetForegroundWindow would be ignored and the
+# taskbar would merely blink. Attaching OUR thread's input queue to the current
+# foreground thread's makes Windows treat us as that thread for the moment it
+# takes to raise the window. Attach *our* thread — attaching any other pair
+# grants this process nothing.
+$fg = [Win]::GetForegroundWindow()
+$fgThread = [Win]::GetWindowThreadProcessId($fg, [IntPtr]::Zero)
+$myThread = [Win]::GetCurrentThreadId()
+$attached = $false
+if ($fgThread -ne 0 -and $fgThread -ne $myThread) {
+  $attached = [Win]::AttachThreadInput($myThread, $fgThread, $true)
+}
+try {
+  # HWND_TOPMOST then HWND_NOTOPMOST: lifts the window clear of whatever was
+  # covering it, without leaving it permanently pinned above everything.
+  # SWP_NOMOVE|SWP_NOSIZE|SWP_SHOWWINDOW = 0x1|0x2|0x40
+  [Win]::SetWindowPos($hwnd, [IntPtr](-1), 0, 0, 0, 0, 0x43) | Out-Null
+  [Win]::SetWindowPos($hwnd, [IntPtr](-2), 0, 0, 0, 0, 0x43) | Out-Null
+  [Win]::BringWindowToTop($hwnd) | Out-Null
+  [Win]::SetForegroundWindow($hwnd) | Out-Null
+} finally {
+  if ($attached) { [Win]::AttachThreadInput($myThread, $fgThread, $false) | Out-Null }
+}
+
+# Report what actually ended up in front, so the caller isn't guessing.
+$now = [Win]::GetForegroundWindow()
+if ($now -eq $hwnd) { Write-Output 'foreground' } else { Write-Output 'opened' }
+`,n=Buffer.from(r,"utf16le").toString("base64"),new Promise((e,t)=>{(0,x.execFile)("powershell.exe",["-NoProfile","-STA","-EncodedCommand",n],{windowsHide:!0,timeout:2e4},(r,n,o)=>{if(r)return t(Error((o??"").trim().split("\n")[0]||(0,S.t)("err.explorerFailed")));e((n??"").trim().endsWith("foreground")?"foreground":"opened")})})}}(r);return y.NextResponse.json({ok:!0,result:e})}catch(e){return y.NextResponse.json({error:e.message},{status:500})}}e.s(["POST",0,T,"runtime",0,"nodejs"],396590);var W=e.i(396590);let P=new t.AppRouteRouteModule({definition:{kind:r.RouteKind.APP_ROUTE,page:"/api/open-folder/route",pathname:"/api/open-folder",filename:"route",bundlePath:""},distDir:".next-release",relativeProjectDir:"",resolvedPagePath:"[project]/app/api/open-folder/route.ts",nextConfigOutput:"standalone",userland:W,...{}}),{workAsyncStorage:k,workUnitAsyncStorage:E,serverHooks:A}=P;async function I(e,t,n){n.requestMeta&&(0,o.setRequestMeta)(e,n.requestMeta),P.isDev&&(0,o.addRequestMeta)(e,"devRequestTimingInternalsEnd",process.hrtime.bigint());let x="/api/open-folder/route";x=x.replace(/\/index$/,"")||"/";let v=await P.prepare(e,t,{srcPage:x,multiZoneDraftMode:!1});if(!v)return t.statusCode=400,t.end("Bad Request"),null==n.waitUntil||n.waitUntil.call(n,Promise.resolve()),null;let{buildId:R,deploymentId:b,params:y,nextConfig:$,parsedUrl:S,isDraftMode:T,prerenderManifest:W,routerServerContext:k,isOnDemandRevalidate:E,revalidateOnlyGenerated:A,resolvedPathname:I,clientReferenceManifest:N,serverActionsManifest:O}=v,C=(0,s.normalizeAppPath)(x),_=!!(W.dynamicRoutes[C]||W.routes[I]),D=async()=>((null==k?void 0:k.render404)?await k.render404(e,t,S,!1):t.end("This page could not be found"),null);if(_&&!T){let e=!!W.routes[I],t=W.dynamicRoutes[C];if(t&&!1===t.fallback&&!e){if($.adapterPath)return await D();throw new g.NoFallbackError}}let q=null;!_||P.isDev||T||(q="/index"===(q=I)?"/":q);let j=!0===P.isDev||!_,F=_&&!j;O&&N&&(0,i.setManifestsSingleton)({page:x,clientReferenceManifest:N,serverActionsManifest:O});let H=e.method||"GET",M=(0,a.getTracer)(),U=M.getActiveScopeSpan(),L=!!(null==k?void 0:k.isWrappedByNextServer),B=!!(0,o.getRequestMeta)(e,"minimalMode"),G=(0,o.getRequestMeta)(e,"incrementalCache")||await P.getIncrementalCache(e,$,W,B);null==G||G.resetRequestCache(),globalThis.__incrementalCache=G;let K={params:y,previewProps:W.preview,renderOpts:{experimental:{authInterrupts:!!$.experimental.authInterrupts},cacheComponents:!!$.cacheComponents,supportsDynamicResponse:j,incrementalCache:G,cacheLifeProfiles:$.cacheLife,waitUntil:n.waitUntil,onClose:e=>{t.on("close",e)},onAfterTaskError:void 0,onInstrumentationRequestError:(t,r,n,o)=>P.onRequestError(e,t,n,o,k)},sharedContext:{buildId:R,deploymentId:b}},V=new l.NodeNextRequest(e),X=new l.NodeNextResponse(t),Z=u.NextRequestAdapter.fromNodeNextRequest(V,(0,u.signalFromNodeResponse)(t));try{let o,i=async e=>P.handle(Z,K).finally(()=>{if(!e)return;e.setAttributes({"http.status_code":t.statusCode,"next.rsc":!1});let r=M.getRootSpanAttributes();if(!r)return;if(r.get("next.span_type")!==d.BaseServerSpan.handleRequest)return void console.warn(`Unexpected root span type '${r.get("next.span_type")}'. Please report this Next.js issue https://github.com/vercel/next.js`);let n=r.get("next.route");if(n){let t=`${H} ${n}`;e.setAttributes({"next.route":n,"http.route":n,"next.span_name":t}),e.updateName(t),o&&o!==e&&(o.setAttribute("http.route",n),o.updateName(t))}else e.updateName(`${H} ${x}`)}),s=async o=>{var a,s;let l=async({previousCacheEntry:r})=>{try{if(!B&&E&&A&&!r)return t.statusCode=404,t.setHeader("x-nextjs-cache","REVALIDATED"),t.end("This page could not be found"),null;let a=await i(o);e.fetchMetrics=K.renderOpts.fetchMetrics;let s=K.renderOpts.pendingWaitUntil;s&&n.waitUntil&&(n.waitUntil(s),s=void 0);let l=K.renderOpts.collectedTags;if(!_)return await (0,p.sendResponse)(V,X,a,K.renderOpts.pendingWaitUntil),null;{let e=await a.blob(),t=(0,h.toNodeOutgoingHttpHeaders)(a.headers);l&&(t[w.NEXT_CACHE_TAGS_HEADER]=l),!t["content-type"]&&e.type&&(t["content-type"]=e.type);let r=void 0!==K.renderOpts.collectedRevalidate&&!(K.renderOpts.collectedRevalidate>=w.INFINITE_CACHE)&&K.renderOpts.collectedRevalidate,n=void 0===K.renderOpts.collectedExpire||K.renderOpts.collectedExpire>=w.INFINITE_CACHE?void 0:K.renderOpts.collectedExpire;return{value:{kind:m.CachedRouteKind.APP_ROUTE,status:a.status,body:Buffer.from(await e.arrayBuffer()),headers:t},cacheControl:{revalidate:r,expire:n}}}}catch(t){throw(null==r?void 0:r.isStale)&&await P.onRequestError(e,t,{routerKind:"App Router",routePath:x,routeType:"route",revalidateReason:(0,c.getRevalidateReason)({isStaticGeneration:F,isOnDemandRevalidate:E})},!1,k),t}},u=await P.handleResponse({req:e,nextConfig:$,cacheKey:q,routeKind:r.RouteKind.APP_ROUTE,isFallback:!1,prerenderManifest:W,isRoutePPREnabled:!1,isOnDemandRevalidate:E,revalidateOnlyGenerated:A,responseGenerator:l,waitUntil:n.waitUntil,isMinimalMode:B});if(!_)return null;if((null==u||null==(a=u.value)?void 0:a.kind)!==m.CachedRouteKind.APP_ROUTE)throw Object.defineProperty(Error(`Invariant: app-route received invalid cache entry ${null==u||null==(s=u.value)?void 0:s.kind}`),"__NEXT_ERROR_CODE",{value:"E701",enumerable:!1,configurable:!0});B||t.setHeader("x-nextjs-cache",E?"REVALIDATED":u.isMiss?"MISS":u.isStale?"STALE":"HIT"),T&&t.setHeader("Cache-Control","private, no-cache, no-store, max-age=0, must-revalidate");let d=(0,h.fromNodeOutgoingHttpHeaders)(u.value.headers);return B&&_||d.delete(w.NEXT_CACHE_TAGS_HEADER),!u.cacheControl||t.getHeader("Cache-Control")||d.get("Cache-Control")||d.set("Cache-Control",(0,f.getCacheControlHeader)(u.cacheControl)),await (0,p.sendResponse)(V,X,new Response(u.value.body,{headers:d,status:u.value.status||200})),null};L&&U?await s(U):(o=M.getActiveScopeSpan(),await M.withPropagatedContext(e.headers,()=>M.trace(d.BaseServerSpan.handleRequest,{spanName:`${H} ${x}`,kind:a.SpanKind.SERVER,attributes:{"http.method":H,"http.target":e.url}},s),void 0,!L))}catch(t){if(t instanceof g.NoFallbackError||await P.onRequestError(e,t,{routerKind:"App Router",routePath:C,routeType:"route",revalidateReason:(0,c.getRevalidateReason)({isStaticGeneration:F,isOnDemandRevalidate:E})},!1,k),_)throw t;return await (0,p.sendResponse)(V,X,new Response(null,{status:500})),null}}e.s(["handler",0,I,"patchFetch",0,function(){return(0,n.patchFetch)({workAsyncStorage:k,workUnitAsyncStorage:E})},"routeModule",0,P,"serverHooks",0,A,"workAsyncStorage",0,k,"workUnitAsyncStorage",0,E],977077)}];

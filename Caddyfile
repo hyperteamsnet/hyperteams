@@ -1,0 +1,83 @@
+{
+	auto_https off
+
+	admin 127.0.0.1:27789
+}
+
+http://:{$CADDY_PORT:27788} {
+	bind 127.0.0.1 ::1
+
+	log {
+		output file access.log {
+			roll_size 10MiB
+			roll_keep 5
+		}
+	}
+
+	header X-Robots-Tag "noindex, nofollow, noarchive, nosnippet, noimageindex"
+
+	handle /robots.txt {
+		header Content-Type "text/plain; charset=utf-8"
+		respond `User-agent: *
+Disallow: /
+` 200
+	}
+
+	@bots header_regexp User-Agent (?i)(bot\b|bot/|crawl|spider|scrap|slurp|archiver|facebookexternalhit|headlesschrome|phantomjs|semrush|ahrefs|mj12|dotbot|bytespider|petalbot|gptbot|ccbot|claudebot|perplexity|applebot|amazonbot)
+	handle @bots {
+		respond "" 403
+	}
+
+	map {host} {preview_port} {
+		import previews.map
+		default ""
+	}
+
+	map {host} {is_dashboard} {
+		import dashboards.map
+		default ""
+	}
+
+	@dashboard vars {is_dashboard} 1
+	header @dashboard {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Content-Security-Policy "frame-ancestors 'self'"
+		Referrer-Policy "same-origin"
+		-Server
+	}
+
+	@preview vars_regexp {preview_port} ^[0-9]+$
+
+	handle @preview {
+		handle /_hyperteams/auth/* {
+			reverse_proxy 127.0.0.1:{$DASHBOARD_PORT:27777} {
+				header_up X-Forwarded-For {http.request.header.CF-Connecting-IP}
+				header_up X-Real-IP {http.request.header.CF-Connecting-IP}
+				header_up X-Forwarded-Proto https
+			}
+		}
+
+		handle {
+			forward_auth 127.0.0.1:{$DASHBOARD_PORT:27777} {
+				uri /api/auth/check
+				header_up X-Forwarded-Host {host}
+				header_up X-Forwarded-Uri {uri}
+				header_up X-Forwarded-Proto https
+
+				header_up -Connection
+				header_up -Upgrade
+			}
+			reverse_proxy 127.0.0.1:{preview_port} {
+				header_up X-Forwarded-For {http.request.header.CF-Connecting-IP}
+				header_up X-Real-IP {http.request.header.CF-Connecting-IP}
+				header_up X-Forwarded-Proto https
+			}
+		}
+	}
+
+	handle {
+		respond "알 수 없는 호스트입니다." 404
+	}
+}
