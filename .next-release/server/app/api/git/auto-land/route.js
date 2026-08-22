@@ -1,0 +1,13 @@
+var R=require("../../../../chunks/[turbopack]_runtime.js")("server/app/api/git/auto-land/route.js")
+R.c("server/chunks/[root-of-the-server]__0ffum62._.js")
+R.c("server/chunks/lib_1ivwd77._.js")
+R.c("server/chunks/lib_git_auto-land_ts_02-i8l5._.js")
+R.c("server/chunks/lib_git_ops_ts_1gg5tjl._.js")
+R.c("server/chunks/[root-of-the-server]__02xon9e._.js")
+R.c("server/chunks/_0fhqy0y._.js")
+R.c("server/chunks/1y1b_next_069ghxz._.js")
+R.c("server/chunks/lib_i18n_0qbo30f._.js")
+R.c("server/chunks/_1q4_1-r._.js")
+R.c("server/chunks/_next-internal_server_app_api_git_auto-land_route_actions_0d9jpb-.js")
+R.m(515216)
+module.exports=R.m(515216).exports
