@@ -1,0 +1,10 @@
+var R=require("../../../../chunks/[turbopack]_runtime.js")("server/app/api/git/census/route.js")
+R.c("server/chunks/_20iwkg8._.js")
+R.c("server/chunks/1045_next_1si7ymy._.js")
+R.c("server/chunks/[root-of-the-server]__0ffum62._.js")
+R.c("server/chunks/[root-of-the-server]__1dmso7h._.js")
+R.c("server/chunks/lib_i18n_0qbo30f._.js")
+R.c("server/chunks/_1czx-rk._.js")
+R.c("server/chunks/_next-internal_server_app_api_git_census_route_actions_1hbgzcl.js")
+R.m(348313)
+module.exports=R.m(348313).exports

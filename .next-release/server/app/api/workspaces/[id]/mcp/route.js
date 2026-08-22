@@ -1,0 +1,12 @@
+var R=require("../../../../../chunks/[turbopack]_runtime.js")("server/app/api/workspaces/[id]/mcp/route.js")
+R.c("server/chunks/lib_mcp_entry_ts_1hfon72._.js")
+R.c("server/chunks/[root-of-the-server]__042z16r._.js")
+R.c("server/chunks/lib_auth_ts_0ai-jfb._.js")
+R.c("server/chunks/1045_next_dist_esm_build_templates_app-route_1tg3sb_.js")
+R.c("server/chunks/[root-of-the-server]__1dmso7h._.js")
+R.c("server/chunks/_0ti2jrs._.js")
+R.c("server/chunks/1045_next_1si7ymy._.js")
+R.c("server/chunks/lib_i18n_0qbo30f._.js")
+R.c("server/chunks/_next-internal_server_app_api_workspaces_[id]_mcp_route_actions_07-zrjs.js")
+R.m(260341)
+module.exports=R.m(260341).exports

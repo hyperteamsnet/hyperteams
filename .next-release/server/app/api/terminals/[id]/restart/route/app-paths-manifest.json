@@ -1,0 +1,3 @@
+{
+  "/api/terminals/[id]/restart/route": "app/api/terminals/[id]/restart/route.js"
+}
