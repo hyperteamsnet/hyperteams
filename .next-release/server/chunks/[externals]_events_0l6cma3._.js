@@ -1,0 +1,1 @@
+module.exports=[427699,(e,r,s)=>{r.exports=e.x("events",()=>require("events"))}];
