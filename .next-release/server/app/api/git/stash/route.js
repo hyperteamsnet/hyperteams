@@ -1,0 +1,10 @@
+var R=require("../../../../chunks/[turbopack]_runtime.js")("server/app/api/git/stash/route.js")
+R.c("server/chunks/_0u1opai._.js")
+R.c("server/chunks/1y1b_next_069ghxz._.js")
+R.c("server/chunks/[root-of-the-server]__0_6rkgf._.js")
+R.c("server/chunks/lib_i18n_0qbo30f._.js")
+R.c("server/chunks/[root-of-the-server]__02xon9e._.js")
+R.c("server/chunks/_1wm2a5e._.js")
+R.c("server/chunks/_next-internal_server_app_api_git_stash_route_actions_0akfbhu.js")
+R.m(770295)
+module.exports=R.m(770295).exports
