@@ -1,0 +1,3 @@
+{
+  "/api/localai/tts/route": "app/api/localai/tts/route.js"
+}
