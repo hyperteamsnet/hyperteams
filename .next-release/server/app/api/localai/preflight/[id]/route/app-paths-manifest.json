@@ -1,0 +1,3 @@
+{
+  "/api/localai/preflight/[id]/route": "app/api/localai/preflight/[id]/route.js"
+}

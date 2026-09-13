@@ -1,0 +1,3 @@
+{
+  "/api/tunnel/bindings/[id]/route": "app/api/tunnel/bindings/[id]/route.js"
+}

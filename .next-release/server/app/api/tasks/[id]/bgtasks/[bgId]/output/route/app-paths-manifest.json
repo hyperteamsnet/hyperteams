@@ -1,0 +1,3 @@
+{
+  "/api/tasks/[id]/bgtasks/[bgId]/output/route": "app/api/tasks/[id]/bgtasks/[bgId]/output/route.js"
+}
