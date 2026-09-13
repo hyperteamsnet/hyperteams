@@ -1,0 +1,16 @@
+[variables]
+NIXPACKS_NODE_VERSION = "22"
+NPM_CONFIG_PREFIX = "/app/.npm-global"
+NEXT_TELEMETRY_DISABLED = "1"
+
+[phases.setup]
+aptPkgs = ["...", "git", "ripgrep", "ca-certificates", "curl", "libgomp1", "gcc", "libc6-dev"]
+
+[phases.install]
+cmds = ["npm install -g @anthropic-ai/claude-code"]
+
+[phases.build]
+cmds = []
+
+[start]
+cmd = "bash scripts/start-container.sh"
