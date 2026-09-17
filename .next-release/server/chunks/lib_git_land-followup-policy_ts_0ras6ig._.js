@@ -1,0 +1,4 @@
+module.exports=[277653,e=>{"use strict";let t=new Set(["pushed","landed","merged","committed","partial","nothing-to-commit"]);e.s(["LAND_FOLLOWUP_MAX",0,2,"conflictHeaderKey",0,function(e){return(e??"").trim()?"git.followUp.conflictBase":"git.followUp.conflict"},"followUpPrompt",0,function(e,t){let n=t.join("\n\n").trim(),c=n.length>8e3?`${n.slice(0,8e3)}
+…`:n;return`${e}
+
+${c}`},"planLandFollowUp",0,function(e){let n=Math.max(0,Math.trunc(Number(e.sent??0))||0),c=function(e){switch(e){case"halted:worktree-checks":case"halted:checks":return"checks";case"halted:merge-broke-checks":return"merge-broke-checks";case"halted:merge-conflict":return"conflict";default:return null}}(e.state);return c?e.on&&0!==e.errors.length?n>=2?"capped":{kind:c,attempt:n+1}:null:n>0&&t.has(e.state)?"reset":null}])}];
