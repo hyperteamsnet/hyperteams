@@ -1,0 +1,1 @@
+module.exports=[509252,a=>{"use strict";let b=(0,a.i(700600).default)("arrow-down",[["path",{d:"M12 5v14",key:"s699le"}],["path",{d:"m19 12-7 7-7-7",key:"1idqje"}]]);a.s(["ArrowDown",0,b],509252)},291638,a=>{a.n(a.i(164737))}];
