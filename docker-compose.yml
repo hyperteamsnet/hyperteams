@@ -1,0 +1,53 @@
+# HyperTeams — Docker Compose
+#
+#   1. Put this file in an empty folder and create a .env next to it:
+#        DASHBOARD_PASSWORD=choose-a-strong-password
+#   2. docker compose up -d --build
+#   3. Open http://localhost:27777 and sign in.
+#   4. Sign Claude Code in once (the login is kept in the volume):
+#        docker compose exec hyperteams claude
+#      Or set ANTHROPIC_API_KEY in .env instead.
+#
+# Update to the latest release: docker compose up -d --build
+#
+# The image is built from the Dockerfile on this repository's main branch, which
+# copies the prebuilt Linux release for your machine; nothing is compiled.
+#
+# ⚠ Anyone who can reach this dashboard can run any command in the container.
+#   The port is published on 127.0.0.1 only. To put it on a domain, run it
+#   behind a TLS reverse proxy and set DASHBOARD_PUBLIC_HOSTS to that domain.
+#
+# Settings (.env):
+#   DASHBOARD_PASSWORD        required — or DASHBOARD_PASSWORD_HASH, so the
+#                             password itself is not stored; make one with
+#                               docker compose run --rm hyperteams node scripts/hash-password.mjs
+#   ANTHROPIC_API_KEY         optional — instead of `claude` login
+#   DASHBOARD_PUBLIC_HOSTS    optional — domain(s) this is served on, comma-separated
+#   HYPERTEAMS_PORT           optional — host port (default 27777)
+#   HYPERTEAMS_BIND           optional — host address (default 127.0.0.1)
+
+name: hyperteams
+
+services:
+  hyperteams:
+    build: https://github.com/hyperteamsnet/hyperteams.git#main
+    image: hyperteams:latest
+    restart: unless-stopped
+    ports:
+      - "${HYPERTEAMS_BIND:-127.0.0.1}:${HYPERTEAMS_PORT:-27777}:3000"
+    environment:
+      DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD:-}
+      DASHBOARD_PASSWORD_HASH: ${DASHBOARD_PASSWORD_HASH:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      DASHBOARD_PUBLIC_HOSTS: ${DASHBOARD_PUBLIC_HOSTS:-}
+      # Requests reach the container through Docker's port forwarding, so they
+      # never come from loopback. This lets them in; the password still applies.
+      HYPERTEAMS_BEHIND_PROXY: "1"
+      # Where the start script keeps the Claude Code login, so that
+      # `docker compose exec` finds it too.
+      HOME: /data/home
+    volumes:
+      - hyperteams-data:/data
+
+volumes:
+  hyperteams-data:
