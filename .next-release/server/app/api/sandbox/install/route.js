@@ -1,0 +1,12 @@
+var R=require("../../../../chunks/[turbopack]_runtime.js")("server/app/api/sandbox/install/route.js")
+R.c("server/chunks/[root-of-the-server]__0ju4nob._.js")
+R.c("server/chunks/_07mkbzu._.js")
+R.c("server/chunks/lib_sandbox_1fhiayx._.js")
+R.c("server/chunks/lib_sandbox_installer_ts_1spsf45._.js")
+R.c("server/chunks/1045_next_1k1flzy._.js")
+R.c("server/chunks/lib_i18n_0-ydydt._.js")
+R.c("server/chunks/_0s46uz1._.js")
+R.c("server/chunks/[root-of-the-server]__1dmso7h._.js")
+R.c("server/chunks/_next-internal_server_app_api_sandbox_install_route_actions_1s4mjsd.js")
+R.m(21826)
+module.exports=R.m(21826).exports

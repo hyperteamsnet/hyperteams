@@ -1,0 +1,128 @@
+{
+  "instructions": "Tools for a HyperTeams agent team: agents in the same checkout (or in folders the person assigned) that message each other. Messages become the recipient's next instruction. Use team_read before judging a teammate's work, and team_send to guide it.",
+  "tools": [
+    {
+      "name": "team_status",
+      "description": "List everyone on your team — name, task number, engine, whether they are running — and how many unread team messages each has.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "team_spawn",
+      "description": "Lead only. Start a teammate: another coding agent (e.g. codex) that works on the brief you give it — in your checkout, or in the other folder the person set for that name on the roster (team_status shows it). Use it to hand off implementation after you have designed it. The brief must be self-contained — the teammate cannot see your conversation. Its finish (or error) comes back to you as a team message. At most 4 teammates; to give an existing one more work, use team_send.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Short role name the team will use for it, e.g. \"implementer\" or \"reviewer\"."
+          },
+          "engine": {
+            "type": "string",
+            "description": "claude-code, codex, agy (Antigravity) or pi. Omit for the team's default."
+          },
+          "brief": {
+            "type": "string",
+            "description": "The whole task: goal, the design decisions already made, files to touch, how to verify, and what to report back."
+          },
+          "model": {
+            "type": "string",
+            "description": "Model for that engine. Omit to use the team default (or the engine's default)."
+          },
+          "effort": {
+            "type": "string",
+            "description": "Reasoning effort for that engine (e.g. low, medium, high). Omit to use the team default (or the engine's default)."
+          }
+        },
+        "required": [
+          "brief"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "team_send",
+      "description": "Send a message to a teammate. It becomes their next instruction: an idle teammate starts on it right away, a busy one gets it when its current turn ends. Use it for guidance, corrections after an error, questions you cannot decide alone, and answers to their questions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Teammate name, task number, or \"lead\"."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "guide",
+              "question",
+              "answer",
+              "report",
+              "alert"
+            ],
+            "description": "guide (direction or a fix), question (you need an answer), answer, report (status), alert (something broke)."
+          },
+          "message": {
+            "type": "string",
+            "description": "Self-contained text. Include file paths and error output when they matter."
+          }
+        },
+        "required": [
+          "to",
+          "message"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "team_read",
+      "description": "See what a teammate has been doing: its status, the recent conversation (instructions, answers, tool calls, errors) and the files changed in its working tree. Use it to review work or to understand an error before you guide it.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "who": {
+            "type": "string",
+            "description": "Teammate name or task number."
+          },
+          "lines": {
+            "type": "number",
+            "description": "How many recent log lines (5–120, default 30)."
+          }
+        },
+        "required": [
+          "who"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "team_inbox",
+      "description": "Read team messages sent to you that you have not seen yet. Messages normally arrive between turns; check this during a long turn so a teammate's question does not wait.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "team_wait",
+      "description": "Block until a team message arrives for you (or until \"who\" stops running), then return it. Use it after asking a question, or when you have nothing to do until a teammate reports. Default 300s, max 900s.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "who": {
+            "type": "string",
+            "description": "Optional teammate to watch."
+          },
+          "timeoutSeconds": {
+            "type": "number",
+            "description": "Seconds to wait (max 900)."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ]
+}
