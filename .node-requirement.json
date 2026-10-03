@@ -1,0 +1,19 @@
+{
+  "sqliteAbis": [
+    {
+      "abi": "127",
+      "major": 22
+    },
+    {
+      "abi": "137",
+      "major": 24
+    },
+    {
+      "abi": "147",
+      "major": 26
+    }
+  ],
+  "builtWith": "v24.19.0",
+  "platform": "linux",
+  "arch": "x64"
+}

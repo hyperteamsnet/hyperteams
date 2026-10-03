@@ -1,0 +1,35 @@
+/* 워드·파워포인트 프레임의 바탕. 종이(쪽·슬라이드)는 언제나 흰색이고, 그 둘레만 테마를 따릅니다. */
+:root { color-scheme: light; --bg: #eef0f3; --muted: #6b7280; }
+:root[data-theme="dark"] { color-scheme: dark; --bg: #1b1d21; --muted: #9ca3af; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); overflow: auto; -webkit-text-size-adjust: 100%; }
+#root { min-height: 100%; }
+
+/* docx-preview 의 둘레(회색 판)를 우리 바탕으로. 폰에서는 여백을 줄입니다. */
+.docx-wrapper { background: var(--bg) !important; padding: 24px 16px !important; }
+.docx-wrapper > section.docx { box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important; margin-bottom: 20px !important; }
+@media (max-width: 600px) {
+  .docx-wrapper { padding: 10px 6px !important; }
+  .docx-wrapper > section.docx { margin-bottom: 10px !important; }
+}
+
+/* 파워포인트 — 넓은 화면에서 슬라이드가 끝없이 커지지 않게. */
+body[data-kind="pptx"] #root { max-width: 1280px; margin: 0 auto; padding: 16px; box-sizing: border-box; }
+@media (max-width: 600px) { body[data-kind="pptx"] #root { padding: 8px; } }
+
+/*
+ * 윈도우 오피스 글꼴을 이 기기의 비슷한 글꼴로 잇습니다. 진짜가 설치돼 있으면 그것이
+ * 먼저입니다(local() 의 첫 항목). 없으면 맑은 고딕으로 쓴 문서가 명조체 기본 글꼴로
+ * 떨어져 전혀 다른 문서처럼 보입니다.
+ */
+@font-face { font-family: "맑은 고딕"; src: local("Malgun Gothic"), local("Apple SD Gothic Neo"), local("AppleSDGothicNeo-Regular"), local("Noto Sans KR"), local("Noto Sans CJK KR"); }
+@font-face { font-family: "Malgun Gothic"; src: local("Malgun Gothic"), local("Apple SD Gothic Neo"), local("AppleSDGothicNeo-Regular"), local("Noto Sans KR"), local("Noto Sans CJK KR"); }
+@font-face { font-family: "굴림"; src: local("Gulim"), local("Apple SD Gothic Neo"), local("AppleSDGothicNeo-Regular"), local("Noto Sans KR"); }
+@font-face { font-family: "돋움"; src: local("Dotum"), local("Apple SD Gothic Neo"), local("AppleSDGothicNeo-Regular"), local("Noto Sans KR"); }
+@font-face { font-family: "바탕"; src: local("Batang"), local("AppleMyungjo"), local("Noto Serif KR"), local("Noto Serif CJK KR"); }
+@font-face { font-family: "Calibri"; src: local("Calibri"), local("Carlito"), local("Helvetica Neue"), local("Arial"); }
+@font-face { font-family: "Calibri Light"; src: local("Calibri Light"), local("Carlito"), local("Helvetica Neue Light"), local("Helvetica Neue"); }
+@font-face { font-family: "Cambria"; src: local("Cambria"), local("Caladea"), local("Georgia"); }
+@font-face { font-family: "Meiryo"; src: local("Meiryo"), local("Hiragino Sans"), local("Hiragino Kaku Gothic ProN"), local("Noto Sans JP"); }
+@font-face { font-family: "MS Gothic"; src: local("MS Gothic"), local("Hiragino Sans"), local("Noto Sans JP"); }
+@font-face { font-family: "Microsoft YaHei"; src: local("Microsoft YaHei"), local("PingFang SC"), local("Noto Sans SC"); }
