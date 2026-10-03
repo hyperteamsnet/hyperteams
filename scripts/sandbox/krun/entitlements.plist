@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- macOS: Hypervisor.framework 는 이 권한으로 서명된 프로세스만 VM 을 만들게 합니다(lib/sandbox/installer.ts 가 임시 서명). -->
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.hypervisor</key>
+	<true/>
+</dict>
+</plist>
