@@ -1,0 +1,12 @@
+var R=require("../../../../chunks/[turbopack]_runtime.js")("server/app/api/dictation/transcribe/route.js")
+R.c("server/chunks/_0sou7x2._.js")
+R.c("server/chunks/[root-of-the-server]__17fpg4e._.js")
+R.c("server/chunks/lib_localai_014vn_j._.js")
+R.c("server/chunks/1y1b_next_1e1wihx._.js")
+R.c("server/chunks/lib_i18n_0-ydydt._.js")
+R.c("server/chunks/[root-of-the-server]__02xon9e._.js")
+R.c("server/chunks/lib_auth_ts_0ai-jfb._.js")
+R.c("server/chunks/_0p-ovtz._.js")
+R.c("server/chunks/_next-internal_server_app_api_dictation_transcribe_route_actions_19wzs8p.js")
+R.m(618780)
+module.exports=R.m(618780).exports

@@ -1,0 +1,1 @@
+module.exports=[750227,(e,r,t)=>{r.exports=e.x("node:path",()=>require("node:path"))},119688,e=>{"use strict";var r=e.i(750227);function t(){return process.env.DB_PATH??r.default.join(process.cwd(),"data.db")}e.s(["dbFile",0,t,"ownsInstallTree",0,function(){return r.default.resolve(t())===r.default.resolve(process.cwd(),"data.db")}])}];

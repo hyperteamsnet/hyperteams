@@ -1,0 +1,3 @@
+{
+  "/api/workspaces/[id]/skills/route": "app/api/workspaces/[id]/skills/route.js"
+}

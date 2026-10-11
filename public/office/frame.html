@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<!--
+  워드·파워포인트 뷰어의 프레임. components/OfficeFrame.tsx 가 sandbox="allow-scripts" 로 엽니다.
+  네트워크를 전부 막습니다(connect-src 'none' 외) — 문서 바이트는 부모가 postMessage 로 줍니다.
+-->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src data: blob:; media-src data: blob:; font-src data: blob:; connect-src 'none'; frame-src 'none'; worker-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<link rel="stylesheet" href="frame.css">
+<script type="module" src="frame.js"></script>
+</head>
+<body>
+<div id="root"></div>
+</body>
+</html>
