@@ -1,0 +1,963 @@
+{
+  "instructions": "A real Chromium browser that belongs to this working directory. The person logs in to sites there from the dashboard's Browser tab, so its cookies are theirs — prefer it over fetching pages yourself when a site needs a login or JavaScript.\nSemantic pages (forms, lists, links): navigate → snapshot → click/type with refs. A ref stays valid while its element is on the page, so do several actions from one snapshot and snapshot again only to see what changed. Use snapshot ref=… to read just one part of a big page.\nSave round trips: use batch to run several steps (fill a form, then submit) in one call, with snapshot=true to see the result.\nForm widgets (sliders, spinners, date pickers, color pickers, custom dropdowns) are controls, not pictures: click or focus them by ref (or by the locator the snapshot lists for handles it leaves out), then use press (ArrowLeft/ArrowRight, Home/End, PageUp/PageDown), or set the value with evaluate — it runs in the page and can call the page's own widget code. Check the value in a snapshot afterwards.\nPictures (canvas, games, maps, charts, free drag-and-drop): screenshot, then mouse/press with viewport coordinates — snapshot boxes=true gives element boxes in the same coordinates, and mouse drag takes ref/to_ref. To read small text or an image, screenshot ref=… zoom=3 format=png.\nExact text: the snapshot collapses spaces and line breaks. To copy text exactly, take it from the exact values the snapshot lists, read it with evaluate (el.value, el.textContent), or select it and use press ControlOrMeta+C then ControlOrMeta+V. To select a span of text, use evaluate with document.createRange() and window.getSelection().addRange(range).\nWhen timing matters (things move or change within seconds), an action must repeat many times, or you are about to click and snapshot the same way a fifth time, write one script instead: it reads the page state and acts in a loop, far faster than one tool call per action. Trial-and-error puzzles fit too — let the script try, detect the result, remember it and retry.\nMenus with submenus usually open on hover: hover the parent item instead of clicking it, then click the final item.\nContent that only shows when printing: emulate media=print, then snapshot or screenshot. Downloads are reported in the tool result with their saved path.\nIf the same approach fails two or three times, change approach (another tool, a script, a screenshot) instead of repeating it.\nYou work in your own tabs. Do not use the person's tabs unless they ask.\nWhen a site asks you to sign in, call login on the sign-in page: it types a login the person saved into the fields without showing you the password. Never ask for passwords in chat, and never try to read or reveal a filled password.\nWhen only the person can continue (no saved login, 2FA code, captcha, payment approval), call hand_off with a one-line request in their language.\nIf a call fails because the user is in control, stop using the browser and tell them what you need.\nIf the person wants a browser job repeated (daily, on a schedule, from a script), make it a saved browser script: saved_script clear, do the job once cleanly, saved_script save, then saved_script run to test it. It then replays without a model, and a task is opened only when it breaks.\nDebugging a page: console shows its messages and errors; network lists its requests (and request shows headers and bodies), mocks responses with mock or cuts the network with offline — only in your tab; storage reads or changes this site's cookies, localStorage and sessionStorage.\nFiles for the person: screenshot save=true writes the image to .hyperteams/browser/ of your working tree, screenshot format=pdf saves the page as a PDF, and record start … stop saves a video of your tabs. Give the person the paths. To put files into a page, use upload: a file input gets them set, anything else (a drop zone, an editor) gets them dropped as if dragged from the desktop.\nWhen the browser part is done, call finish (keep the tabs the person should see). Tabs you do not keep are closed when your task ends anyway.",
+  "tools": [
+    {
+      "name": "tabs",
+      "description": "List the open tabs of the built-in browser with their owners. Your tabs are marked 'yours'; 'user' tabs belong to the person and may be used only when they ask.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "navigate",
+      "description": "Open a URL in your tab of the built-in browser (it keeps the logins the user made there). Starts the browser if needed.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Absolute URL, or a host like example.com."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          },
+          "new_tab": {
+            "type": "boolean",
+            "description": "Open in a new tab."
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "snapshot",
+      "description": "Read the page as an accessibility tree with [ref=…] markers. Use those refs with click, type, select and hover. A ref stays the same for the same element across snapshots, so you need not snapshot after every action. Text is shown with whitespace collapsed; exact field values that differ are listed after the tree. Pass ref to read only that part of the page, boxes to get each element's viewport box [box=x,y,w,h] for the mouse tool, depth to limit nesting on huge pages.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          },
+          "ref": {
+            "type": "string",
+            "description": "Only this element's subtree."
+          },
+          "boxes": {
+            "type": "boolean",
+            "description": "Append [box=x,y,width,height] (viewport CSS pixels) to each element."
+          },
+          "depth": {
+            "type": "number",
+            "description": "Limit the tree depth."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "click",
+      "description": "Click an element by its snapshot ref.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "Element ref from the latest snapshot, e.g. e12 or f1e3."
+          },
+          "locator": {
+            "type": "string",
+            "description": "Use ref when the element has one. locator is for elements without a ref (the controls a snapshot lists separately) and for saved scripts: a Playwright selector such as css=#send or internal:role=button[name=\"Save\"i]. Never guess an index like \">> nth=1\"."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          },
+          "double": {
+            "type": "boolean",
+            "description": "Double-click."
+          },
+          "button": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right",
+              "middle"
+            ]
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "type",
+      "description": "Type text into an input by its snapshot ref. Replaces the current value unless append is true. Set submit to press Enter afterwards.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "Element ref from the latest snapshot, e.g. e12 or f1e3."
+          },
+          "locator": {
+            "type": "string",
+            "description": "Use ref when the element has one. locator is for elements without a ref (the controls a snapshot lists separately) and for saved scripts: a Playwright selector such as css=#send or internal:role=button[name=\"Save\"i]. Never guess an index like \">> nth=1\"."
+          },
+          "text": {
+            "type": "string",
+            "description": "Text to enter."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          },
+          "submit": {
+            "type": "boolean",
+            "description": "Press Enter after typing."
+          },
+          "append": {
+            "type": "boolean",
+            "description": "Type key by key after the existing value instead of replacing it."
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "press",
+      "description": "Press a key or chord on the focused element, e.g. Enter, Escape, ArrowDown, ControlOrMeta+A (Meta on macOS, Control elsewhere), ControlOrMeta+C / ControlOrMeta+V to copy and paste. times repeats it (with delay_ms between), hold_seconds keeps it held down, action down/up presses or releases it only.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Key name as Playwright accepts it."
+          },
+          "times": {
+            "type": "number",
+            "description": "Press this many times (1-100)."
+          },
+          "delay_ms": {
+            "type": "number",
+            "description": "Pause between repeated presses (ms)."
+          },
+          "hold_seconds": {
+            "type": "number",
+            "description": "Hold the key down this long (max 30)."
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "press",
+              "down",
+              "up"
+            ],
+            "description": "down or up only presses or releases it."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "select",
+      "description": "Choose option(s) in a <select> by its snapshot ref.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "Element ref from the latest snapshot, e.g. e12 or f1e3."
+          },
+          "locator": {
+            "type": "string",
+            "description": "Use ref when the element has one. locator is for elements without a ref (the controls a snapshot lists separately) and for saved scripts: a Playwright selector such as css=#send or internal:role=button[name=\"Save\"i]. Never guess an index like \">> nth=1\"."
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Option values or labels."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          }
+        },
+        "required": [
+          "values"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "hover",
+      "description": "Move the mouse over an element by its snapshot ref.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "Element ref from the latest snapshot, e.g. e12 or f1e3."
+          },
+          "locator": {
+            "type": "string",
+            "description": "Use ref when the element has one. locator is for elements without a ref (the controls a snapshot lists separately) and for saved scripts: a Playwright selector such as css=#send or internal:role=button[name=\"Save\"i]. Never guess an index like \">> nth=1\"."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scroll",
+      "description": "Scroll an element into view by ref, or scroll the page by dy/dx pixels (default: one screen down).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "Element ref from the latest snapshot, e.g. e12 or f1e3."
+          },
+          "locator": {
+            "type": "string",
+            "description": "Use ref when the element has one. locator is for elements without a ref (the controls a snapshot lists separately) and for saved scripts: a Playwright selector such as css=#send or internal:role=button[name=\"Save\"i]. Never guess an index like \">> nth=1\"."
+          },
+          "dx": {
+            "type": "number"
+          },
+          "dy": {
+            "type": "number"
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "wait",
+      "description": "Wait until some text appears or disappears, until a JavaScript condition is true, or for a number of seconds (max 30). With text/text_gone/until, seconds is the time limit.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Wait until this text is visible."
+          },
+          "text_gone": {
+            "type": "string",
+            "description": "Wait until this text is gone."
+          },
+          "until": {
+            "type": "string",
+            "description": "Wait until this JavaScript expression is truthy in the page, e.g. document.querySelectorAll('.row').length > 10."
+          },
+          "seconds": {
+            "type": "number",
+            "description": "Seconds to wait (max 30)."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "screenshot",
+      "description": "Take a screenshot of your tab — for visual checks the snapshot cannot answer. Pass ref to capture just one element (a canvas, a chart, a captcha-like image), zoom (2-4) to magnify it, and format png for sharp small text. Coordinates in a full-tab screenshot are the viewport CSS pixels the mouse tool uses. save=true also writes the image to a file in .hyperteams/browser/ of your working tree (name sets the file name) — for the person, a report or an attachment. format=pdf saves the whole page as a PDF file there instead of returning an image.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          },
+          "full_page": {
+            "type": "boolean",
+            "description": "Capture the whole scrollable page."
+          },
+          "ref": {
+            "type": "string",
+            "description": "Capture only this element (snapshot ref)."
+          },
+          "zoom": {
+            "type": "number",
+            "description": "Magnify by this factor, 1-4 (default 1; 3 is good for small text)."
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "jpeg",
+              "png",
+              "pdf"
+            ],
+            "description": "jpeg (default, smaller), png (lossless — use for reading small text) or pdf (saves the page as a PDF file)."
+          },
+          "save": {
+            "type": "boolean",
+            "description": "Also save the image to a file and return its path."
+          },
+          "name": {
+            "type": "string",
+            "description": "File name for save or pdf (default screenshot-<time> / page-<time>)."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "emulate",
+      "description": "Emulate CSS media on your tab. media 'print' renders the page as it prints (print-only content appears, as in a print preview — the built-in browser has no print dialog); 'screen' restores it. Also color_scheme and reduced_motion. Take a snapshot or screenshot afterwards.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "media": {
+            "type": "string",
+            "enum": [
+              "print",
+              "screen"
+            ]
+          },
+          "color_scheme": {
+            "type": "string",
+            "enum": [
+              "light",
+              "dark",
+              "no-preference"
+            ]
+          },
+          "reduced_motion": {
+            "type": "string",
+            "enum": [
+              "reduce",
+              "no-preference"
+            ]
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "script",
+      "description": "Run JavaScript inside your tab for work that needs speed or many repetitions: real-time games, reacting within milliseconds, clicking through long sequences, retrying until something changes, reading many values at once. code is the body of an async function — use await, and return a JSON value. It runs in an isolated world: full access to the page's DOM (document, getComputedStyle, canvas getImageData, same-origin iframes) but not to the page's own JavaScript variables. Trusted input helpers (real keyboard/mouse, a few ms round trip each): key(k) e.g. key('ArrowUp'), keyDown(k), keyUp(k), typeText(text, delayMs), mouse.move(x, y, steps), mouse.down(), mouse.up(), mouse.click(x, y), mouse.wheel(dx, dy), clickEl(element). For per-frame loops (games, anything moving) use fire(target, type, init) — an instant DOM event, e.g. fire(window, 'keydown', {key: 'ArrowUp'}) or fire(canvas, 'mousemove', {clientX, clientY}) — untrusted but accepted by most pages; and frame() to wait for the next animation frame. Also sleep(ms), until(fn, timeoutMs, everyMs), log(...values). Coordinates are viewport CSS pixels. Good fits: real-time games (read state → act, every frame), trial-and-error puzzles (try, detect the result, remember, retry — all in one call), long click sequences. A game where one miss restarts it must be played to the end in one call: set seconds high enough and return as soon as the goal shows — control stops between calls. Stops after seconds (default 30, max 600), when the page navigates, or when a dialog opens. Returns the log lines, the return value or the error.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Body of an async function, e.g. \"for (let i = 0; i < 5; i++) { await key('ArrowRight'); await sleep(100); } return document.title;\""
+          },
+          "seconds": {
+            "type": "number",
+            "description": "Time limit in seconds (default 30, max 600)."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "history",
+      "description": "Go back, go forward, or reload your tab.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "back",
+              "forward",
+              "reload"
+            ]
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "tab",
+      "description": "Open a new tab of your own, switch to one of your tabs, or close one of your tabs.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "new",
+              "select",
+              "close"
+            ]
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          },
+          "url": {
+            "type": "string",
+            "description": "URL for a new tab."
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "evaluate",
+      "description": "Evaluate JavaScript in your tab and return its JSON result — an expression, or a function (called for you; with ref it receives that element, e.g. \"(el) => el.textContent\"). It runs in the page itself, so it can read exact values and hidden data, set a widget's value through the page's own code (e.g. a jQuery UI slider), or select text with a Range. Prefer click/type for ordinary controls.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "expression": {
+            "type": "string",
+            "description": "A JavaScript expression, e.g. document.title, or a function such as () => [...document.links].length."
+          },
+          "ref": {
+            "type": "string",
+            "description": "Pass this element (snapshot ref) to the function."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          }
+        },
+        "required": [
+          "expression"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "upload",
+      "description": "Give files to the page. On a file input (snapshot shows it as a button), sets its files. On any other element — a drop zone, an editor, a chat box — drops the files as if dragged in from the desktop. data drops text, a link or HTML instead of (or with) files: a map of MIME type to value, e.g. {\"text/plain\": \"hello\", \"text/uri-list\": \"https://example.com\"}. Paths must be absolute.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "Element ref from the latest snapshot, e.g. e12 or f1e3."
+          },
+          "locator": {
+            "type": "string",
+            "description": "Use ref when the element has one. locator is for elements without a ref (the controls a snapshot lists separately) and for saved scripts: a Playwright selector such as css=#send or internal:role=button[name=\"Save\"i]. Never guess an index like \">> nth=1\"."
+          },
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Absolute file paths."
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Drop: MIME type → value."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "dialog",
+      "description": "Accept or dismiss the JavaScript dialog (alert/confirm/prompt) open on your tab.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "accept": {
+            "type": "boolean",
+            "description": "Accept (true) or dismiss (false)."
+          },
+          "text": {
+            "type": "string",
+            "description": "Answer for a prompt()."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          }
+        },
+        "required": [
+          "accept"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "mouse",
+      "description": "Low-level mouse at viewport coordinates (CSS pixels — the same as the screenshot) or at an element's center: click, down, up, move, drag, hold (press for some seconds) or wheel. Use it for canvases, drag-and-drop, press-and-hold and anything a ref cannot reach (for form widgets try keys or evaluate first). Trusted input, like a real mouse.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "click",
+              "down",
+              "up",
+              "move",
+              "drag",
+              "hold",
+              "wheel"
+            ]
+          },
+          "x": {
+            "type": "number",
+            "description": "Viewport x in CSS pixels."
+          },
+          "y": {
+            "type": "number",
+            "description": "Viewport y in CSS pixels."
+          },
+          "ref": {
+            "type": "string",
+            "description": "Use the center of this element instead of x/y."
+          },
+          "locator": {
+            "type": "string",
+            "description": "Like ref, as a stable Playwright selector."
+          },
+          "to_x": {
+            "type": "number",
+            "description": "Drag end x."
+          },
+          "to_y": {
+            "type": "number",
+            "description": "Drag end y."
+          },
+          "to_ref": {
+            "type": "string",
+            "description": "Drag onto the center of this element."
+          },
+          "to_locator": {
+            "type": "string",
+            "description": "Like to_ref, as a stable Playwright selector."
+          },
+          "button": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right",
+              "middle"
+            ]
+          },
+          "clicks": {
+            "type": "number",
+            "description": "Click count for click (1-3)."
+          },
+          "seconds": {
+            "type": "number",
+            "description": "How long to hold for hold (max 30)."
+          },
+          "dx": {
+            "type": "number",
+            "description": "Wheel delta x."
+          },
+          "dy": {
+            "type": "number",
+            "description": "Wheel delta y."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "batch",
+      "description": "Run several browser steps in one call, in order — e.g. fill a whole form and submit it. Each step is {tool, args} for any browser tool except batch, hand_off, finish and saved_script; refs come from your latest snapshot. Stops at the first step that fails. Set snapshot=true to get a fresh snapshot at the end, so you rarely need a separate snapshot call.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "steps": {
+            "type": "array",
+            "description": "Steps, e.g. [{\"tool\":\"type\",\"args\":{\"ref\":\"e5\",\"text\":\"Kim\"}},{\"tool\":\"click\",\"args\":{\"ref\":\"e9\"}}].",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tool": {
+                  "type": "string"
+                },
+                "args": {
+                  "type": "object"
+                }
+              },
+              "required": [
+                "tool"
+              ]
+            }
+          },
+          "snapshot": {
+            "type": "boolean",
+            "description": "End with a fresh snapshot of the tab."
+          }
+        },
+        "required": [
+          "steps"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "login",
+      "description": "Sign in with a login the person saved in the dashboard's password manager. The browser itself types the saved username and password into this tab's sign-in fields — you never see the password, and it is masked in every tool result. Works only on the site the login was saved for, and only for logins the person allows AI to use. Call it on the page that shows the sign-in form; for two-step sign-ins call it again on the password step. Without username it uses the only saved account or lists the accounts. On a certificate picker (Korean joint certificates, e.g. Hometax) each saved account is named after a certificate owner shown in the list: click that certificate's row first, then call login with that username — it refuses to type when the selected row is a different certificate. If there is no saved login, call hand_off.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Which saved account to use when several are saved for this site (for a certificate, the owner name in the list)."
+          },
+          "submit": {
+            "type": "boolean",
+            "description": "Press Enter after filling to submit the form. Otherwise click the sign-in button yourself."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "hand_off",
+      "description": "Hand your browser space to the person for something only they can do — signing in when login has no saved account, a 2FA code, a captcha, a payment confirmation. They see your tab in the dashboard's Browser tab and get a notification. With wait=true (default) this returns once they hand control back; then take a new snapshot.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "What the person should do, in one sentence, in the user's language."
+          },
+          "wait": {
+            "type": "boolean",
+            "description": "Wait until control comes back (default true)."
+          },
+          "timeout_minutes": {
+            "type": "number",
+            "description": "How long to wait (default 30, max 120)."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "finish",
+      "description": "Close your browser space when the browser part of the task is done. Your tabs are closed except the ones listed in keep, which stay open for the person.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "keep": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tab ids to leave open, e.g. [\"p4\"]."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "saved_script",
+      "description": "Browser scripts replay a browser job WITHOUT a model — on a schedule or from the CLI (hyperteams browser run <name>) — and a task is opened to fix the script only when a replay fails. Every successful action you take is recorded, with refs turned into stable locators. action=save writes the recorded steps to .hyperteams/browser-scripts/<name>.json in your working tree (review and edit the file afterwards; commit it with your work). action=clear forgets the recording — call it after exploring, then do the job once cleanly and save. action=run replays a saved script in your tab and reports every step — use it to test a script you wrote or fixed. action=list shows the saved scripts. Steps are {tool, args} like batch, with locator instead of ref; wait with text is the check that the page reached the expected state. (Not the script tool: that one runs JavaScript in your tab now; saved_script replays recorded steps later.)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "save",
+              "clear",
+              "run",
+              "list"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Script name — letters, digits, - _ . (the file name without .json)."
+          },
+          "description": {
+            "type": "string",
+            "description": "For save: one line saying what the script does."
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "console",
+      "description": "Read the console of your tab: console.log/warn/error messages and uncaught page errors, newest last. level keeps that level and more severe ones (default info). By default only messages since the last navigation; all=true includes earlier pages of the tab. clear=true marks everything read so far, so the next call shows only new messages.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info",
+              "debug"
+            ],
+            "description": "error, warning, info (default) or debug — each includes the more severe levels."
+          },
+          "all": {
+            "type": "boolean",
+            "description": "Include messages from before the last navigation."
+          },
+          "clear": {
+            "type": "boolean",
+            "description": "After reading, start the next read from here."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "network",
+      "description": "Your tab's network. action=requests lists requests since the page loaded, numbered (filter = URL regex; successful images/scripts/styles are hidden unless static=true; clear=true starts the next list from here). action=request with index shows one request's headers, or one part (request-body, response-body, request-headers, response-headers). action=mock answers requests matching pattern (glob like **/api/users*) with status/body/content_type, or abort=true makes them fail; action=unmock removes one pattern or all. action=offline / online cuts or restores the network. mock and offline affect only your tab, never the person's.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "requests",
+              "request",
+              "mock",
+              "unmock",
+              "offline",
+              "online"
+            ],
+            "description": "What to do."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          },
+          "filter": {
+            "type": "string",
+            "description": "requests: only URLs matching this regular expression."
+          },
+          "static": {
+            "type": "boolean",
+            "description": "requests: also list successful static resources."
+          },
+          "clear": {
+            "type": "boolean",
+            "description": "requests: start the next list after the last request shown now."
+          },
+          "index": {
+            "type": "number",
+            "description": "request: the number from the requests list."
+          },
+          "part": {
+            "type": "string",
+            "enum": [
+              "request-headers",
+              "request-body",
+              "response-headers",
+              "response-body"
+            ],
+            "description": "request: return only this part."
+          },
+          "pattern": {
+            "type": "string",
+            "description": "mock/unmock: URL glob or regex string, e.g. **/api/users* ."
+          },
+          "status": {
+            "type": "number",
+            "description": "mock: HTTP status to answer with (default 200)."
+          },
+          "body": {
+            "type": "string",
+            "description": "mock: response body (text or JSON)."
+          },
+          "content_type": {
+            "type": "string",
+            "description": "mock: Content-Type, e.g. application/json."
+          },
+          "abort": {
+            "type": "boolean",
+            "description": "mock: make matching requests fail instead of answering."
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "storage",
+      "description": "Read or change the site data of your tab's site. kind=cookies (only the cookies sent to this page's address; values of httpOnly cookies are hidden), local (localStorage) or session (sessionStorage). action=list, get (name), set (name, value), delete (name) or clear. clear touches only this site, never the person's other logins. Reload the page afterwards if the site should pick up a change.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "cookies",
+              "local",
+              "session"
+            ],
+            "description": "cookies, local or session."
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "list",
+              "get",
+              "set",
+              "delete",
+              "clear"
+            ],
+            "description": "list, get, set, delete or clear."
+          },
+          "name": {
+            "type": "string",
+            "description": "get/set/delete: the cookie or item name."
+          },
+          "value": {
+            "type": "string",
+            "description": "set: the value."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          }
+        },
+        "required": [
+          "kind",
+          "action"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "record",
+      "description": "Record your browser tabs as a video (webm) — to show the person what you did, or to capture a bug. action=start records every tab in your space, including tabs opened later; actions=true draws the cursor and a label for each action. action=chapter shows a title card in the video (title, description). action=stop finishes and returns the file paths (in .hyperteams/browser/ of your working tree). Recording also stops when you call finish.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "start",
+              "stop",
+              "chapter"
+            ],
+            "description": "start, chapter or stop."
+          },
+          "name": {
+            "type": "string",
+            "description": "start: base file name (default video-<time>); each tab adds its id."
+          },
+          "actions": {
+            "type": "boolean",
+            "description": "start: show the cursor and a label for each click/type in the video."
+          },
+          "title": {
+            "type": "string",
+            "description": "chapter: the title shown on the card."
+          },
+          "description": {
+            "type": "string",
+            "description": "chapter: a smaller line under the title."
+          },
+          "seconds": {
+            "type": "number",
+            "description": "chapter: how long the card stays (default 2)."
+          },
+          "page": {
+            "type": "string",
+            "description": "Tab id such as p3. Defaults to the tab you used last."
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+module.exports=[193695,(e,r,a)=>{r.exports=e.x("next/dist/shared/lib/no-fallback-error.external.js",()=>require("next/dist/shared/lib/no-fallback-error.external.js"))},90784,e=>{"use strict";e.s(["MODEL_API_PATH",0,"/api/ai","REST_API_PATH",0,"/api/v1"])}];

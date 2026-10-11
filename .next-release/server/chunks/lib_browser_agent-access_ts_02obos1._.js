@@ -1,0 +1,1 @@
+module.exports=[642788,E=>{"use strict";var O=E.i(195164),_=E.i(885295);E.s(["BROWSER_MCP_NAME",()=>_.BROWSER_MCP_NAME,"BROWSER_TOOL_TIMEOUT_SEC",()=>O.BROWSER_TOOL_TIMEOUT_SEC])}];

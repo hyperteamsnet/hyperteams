@@ -1,0 +1,3 @@
+{
+  "/api/localai/voices/[id]/route": "app/api/localai/voices/[id]/route.js"
+}
