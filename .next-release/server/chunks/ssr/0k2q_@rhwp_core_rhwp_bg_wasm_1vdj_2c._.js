@@ -1,0 +1,1 @@
+module.exports=[453717,a=>{a.v("/_next/static/media/rhwp_bg.03g3-3osl-rpq.wasm"+(globalThis.NEXT_CLIENT_ASSET_SUFFIX||""))}];
