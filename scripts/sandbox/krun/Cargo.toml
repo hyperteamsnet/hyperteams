@@ -1,0 +1,24 @@
+[package]
+name = "hyperteams-krun"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "HyperTeams microVM launcher — one process per VM, libkrun linked in statically"
+
+# libkrun 을 **Rust 라이브러리로** 링크합니다(`crate-type = ["cdylib", "lib"]`). 그래서 결과물은
+# 동적 라이브러리 없이 실행 파일 하나입니다 — macOS 에서는 Hypervisor.framework, Linux 에서는
+# /dev/kvm 만 있으면 됩니다. 판은 태그로 고정하고 Cargo.lock 이 커밋까지 고정합니다.
+#
+# 기능은 `blk` 하나만 켭니다: virtio-net·GPU·사운드·init-blob(libkrun 의 게스트 init) 없이.
+# 게스트 init 은 우리 것(scripts/sandbox/guest/guest-init.sh)이고, 커널 명령줄도 우리가 줍니다.
+[dependencies]
+krun = { package = "libkrun", git = "https://github.com/containers/libkrun", tag = "v1.19.5", default-features = false, features = ["blk"] }
+libc = "0.2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
