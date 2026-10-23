@@ -1,0 +1,3 @@
+{
+  "/htmlview/[token]/[...path]/route": "app/htmlview/[token]/[...path]/route.js"
+}
