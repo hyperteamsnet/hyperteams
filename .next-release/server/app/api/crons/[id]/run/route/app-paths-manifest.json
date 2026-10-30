@@ -1,0 +1,3 @@
+{
+  "/api/crons/[id]/run/route": "app/api/crons/[id]/run/route.js"
+}
