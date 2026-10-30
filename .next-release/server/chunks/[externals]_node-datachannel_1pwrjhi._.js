@@ -1,0 +1,1 @@
+module.exports=[905367,a=>a.a(async(e,t)=>{try{let e=await a.y("node-datachannel-8ef901300a0a0d92");a.n(e),t()}catch(a){t(a)}},!0)];

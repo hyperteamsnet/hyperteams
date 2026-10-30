@@ -1,0 +1,3 @@
+{
+  "/api/tasks/[id]/handoff/route": "app/api/tasks/[id]/handoff/route.js"
+}
